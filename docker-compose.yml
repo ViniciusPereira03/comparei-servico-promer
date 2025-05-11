@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: comparei-servico-promer
+    ports:
+      - "8082:8082"
+    depends_on:
+      - db
+    networks:
+      - net_promer
+      - comparei_net
+    command: ["./wait-for-it.sh", "db", "--", "./main"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "512M"
+  db:
+    image: mysql:8
+    container_name: mysql_promer
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: promerdb
+    volumes:
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - net_promer
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "768M"
+  mongo-promer:
+    image: mongo:latest
+    container_name: mongo-promer
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: promerdb
+      MONGO_INITDB_DATABASE: promerdb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - net_promer
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "768M"
+  redis:
+    image: redis:7
+    container_name: redis_promer
+    networks:
+      - net_promer
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "1G"
+          
+networks:
+  net_promer:
+    driver: bridge
+  
+  comparei_net:
+    external: true
+
+volumes:
+  mongo_data:
