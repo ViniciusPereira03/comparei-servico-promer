@@ -8,14 +8,15 @@ services:
       - "8082:8082"
     depends_on:
       - db
+      - redis
     networks:
       - net_promer
       - comparei_net
-    command: ["./wait-for-it.sh", "db", "--", "./main"]
+    command: ["./wait-for-it.sh", "db:3306", "--", "./main"]
     deploy:
       resources:
         limits:
-          cpus: "1.0"
+          cpus: "0.5"
           memory: "512M"
   db:
     image: mysql:8
@@ -30,8 +31,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
-          memory: "768M"
+          cpus: "0.5"
+          memory: "512M"
   mongo-promer:
     image: mongo:latest
     container_name: mongo-promer
@@ -40,8 +41,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: promerdb
       MONGO_INITDB_DATABASE: promerdb
-    ports:
-      - "27017:27017"
     volumes:
       - mongo_data:/data/db
     networks:
@@ -49,8 +48,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
-          memory: "768M"
+          cpus: "0.5"
+          memory: "512M"
   redis:
     image: redis:7
     container_name: redis_promer
@@ -60,7 +59,7 @@ services:
       resources:
         limits:
           cpus: "0.5"
-          memory: "1G"
+          memory: "768M"
           
 networks:
   net_promer:
