@@ -1,11 +1,13 @@
 package app
 
 import (
+	"log"
 	mercadoprodutos "main/internal/domain/mercado_produtos"
 	"main/internal/domain/mercados"
 	mercados_interface "main/internal/domain/mercados/interface"
 	"main/internal/domain/produtos"
 	produtos_interface "main/internal/domain/produtos/interface"
+	"main/internal/infrastructure/messaging/publisher"
 )
 
 type ProdutosService struct {
@@ -26,7 +28,7 @@ func NewProductsService(
 	}
 }
 
-func (s *ProdutosService) CreateProduct(product *produtos.Produto) (int64, error) {
+func (s *ProdutosService) CreateProduct(product *produtos.Produto, userId string) (int64, error) {
 
 	mercado, err := s.mercadoService.SearchMarketByCoordinates(product.Latitude, product.Longitude)
 	if err != nil {
@@ -64,13 +66,23 @@ func (s *ProdutosService) CreateProduct(product *produtos.Produto) (int64, error
 		if err != nil {
 			return 0, err
 		}
+		err_pub := publisher.PubNewProduct(idMercadoProduto, userId)
+		if err_pub != nil {
+			log.Println("[ERRO PUB] ", err_pub)
+		}
 	} else {
+		idMercadoProduto = mercado_produto.ID
 		mercado_produto.PrecoUnitario = product.Preco
 		mercado_produto.NivelConfianca = 100
 
 		err = s.UpdateMarketProduct(mercado_produto)
 		if err != nil {
 			return 0, err
+		}
+
+		err_pub := publisher.PubUpdateProduct(idMercadoProduto, userId)
+		if err_pub != nil {
+			log.Println("[ERRO PUB] ", err_pub)
 		}
 	}
 

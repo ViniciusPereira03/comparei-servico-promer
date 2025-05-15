@@ -68,7 +68,6 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		sendErrorResponse(w, http.StatusInternalServerError, err_token, "Erro ao refistrar log")
 		return
 	}
-	fmt.Println(userID)
 
 	var produtoDTO dto.CreateProductDTO
 	if err := json.NewDecoder(r.Body).Decode(&produtoDTO); err != nil {
@@ -77,7 +76,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	produto := produtoDTO.ParseToProduct()
-	id, err := service.CreateProduct(produto)
+	id, err := service.CreateProduct(produto, userID)
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err, "Erro ao refistrar log")
 		return
