@@ -86,6 +86,30 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(fmt.Sprintf("Produto %v cadastrado com sucesso!", id))
 }
 
+func IdentifyProduct(w http.ResponseWriter, r *http.Request) {
+	_, err_token := validaToken(w, r)
+	if err_token != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, err_token, "Erro ao refistrar log")
+		return
+	}
+
+	var body dto.ProdutoFotoDTO
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err, "JSON inválido")
+		return
+	}
+
+	produto, err := service.IdetificarProduto(body.ParseToPhoto())
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, err, "Erro ao refistrar log")
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(produto)
+
+}
+
 func GetMarketByCoordinates(w http.ResponseWriter, r *http.Request) {
 	userID, err_token := validaToken(w, r)
 	if err_token != nil {

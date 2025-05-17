@@ -13,6 +13,8 @@ services:
       - net_promer
       - comparei_net
     command: ["./wait-for-it.sh", "db:3306", "--", "./main"]
+    volumes:
+      - ./tmp:/app/tmp
     deploy:
       resources:
         limits:

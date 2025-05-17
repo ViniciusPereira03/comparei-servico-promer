@@ -152,3 +152,7 @@ func (r *MySQLRepository) SearchMarketByCoordinates(lat float64, lng float64) (*
 	}
 	return &m, nil
 }
+
+func (r *MySQLRepository) IdetificarProduto(produto *produtos.ProdutoFoto) (*produtos.Produto, error) {
+	return &produtos.Produto{}, nil
+}
