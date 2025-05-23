@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	mercadoprodutos "main/internal/domain/mercado_produtos"
 	"main/internal/domain/mercados"
 	mercados_interface "main/internal/domain/mercados/interface"
+	"main/internal/infrastructure/messaging/publisher"
 	"os"
 
 	"googlemaps.github.io/maps"
@@ -80,4 +82,17 @@ func (s *MercadoService) GetMarketByCoordinates(lat float64, lng float64) (merca
 
 func (s *MercadoService) SearchMarketByCoordinates(lat float64, lng float64) (*mercados.Mercado, error) {
 	return s.mysqlRepo.SearchMarketByCoordinates(lat, lng)
+}
+
+func (s *MercadoService) ConfirmarValor(data *mercadoprodutos.MercadoProdutos, userId string) (int64, error) {
+	idMercadoProduto, err := s.mysqlRepo.ConfirmarValor(data, userId)
+
+	if err == nil && idMercadoProduto > 0 {
+		err_pub := publisher.PubNewProduct(idMercadoProduto, userId)
+		if err_pub != nil {
+			log.Println("[ERRO PUB] ", err_pub)
+		}
+	}
+
+	return idMercadoProduto, err
 }

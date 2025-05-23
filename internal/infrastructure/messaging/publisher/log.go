@@ -67,3 +67,27 @@ func PubUpdateProduct(mercadoProdutoId int64, userID string) error {
 
 	return nil
 }
+
+func PubConfirmaValor(mercadoProdutoId int64, userID string) error {
+	ctx := context.Background()
+
+	type payload_log struct {
+		Id     int64  `json:"id"`
+		UserID string `json:"user_id"`
+	}
+
+	var p payload_log
+	p.Id = mercadoProdutoId
+	p.UserID = userID
+
+	payload, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		return fmt.Errorf("erro ao codificar payload: %v", err)
+	}
+	_, err = rdb.Publish(ctx, "confirma_valor_mercado_produto", string(payload)).Result()
+	if err != nil {
+		return fmt.Errorf("erro ao publicar mensagem no Redis: %v", err)
+	}
+
+	return nil
+}

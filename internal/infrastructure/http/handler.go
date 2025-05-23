@@ -143,3 +143,26 @@ func GetMarketByCoordinates(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(mercados)
 }
+
+func ConfirmarValor(w http.ResponseWriter, r *http.Request) {
+	userID, err_token := validaToken(w, r)
+	if err_token != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, err_token, "Erro ao refistrar log")
+		return
+	}
+
+	var body dto.ConfirmaMercadoProdutoDTO
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err, "JSON inválido")
+		return
+	}
+
+	_, err := mercado_service.ConfirmarValor(body.ParseToMercadoProdutos(), userID)
+	if err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err, "JSON inválido")
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode("Confirmado")
+}

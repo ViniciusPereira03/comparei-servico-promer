@@ -74,7 +74,7 @@ func (r *MySQLRepository) GetMarketProduct(mercadoId int64, produtoId int64) (*m
 }
 
 func (r *MySQLRepository) UpdateMarketProduct(mercado_produtos *mercadoprodutos.MercadoProdutos) error {
-	_, err := r.db.Exec("UPDATE mercado_produtos SET preco_unitario = ?, nivel_confianca = ?", mercado_produtos.PrecoUnitario, mercado_produtos.NivelConfianca)
+	_, err := r.db.Exec("UPDATE mercado_produtos SET preco_unitario = ?, nivel_confianca = ? WHERE id = ?", mercado_produtos.PrecoUnitario, mercado_produtos.NivelConfianca, mercado_produtos.ID)
 	return err
 }
 
@@ -155,4 +155,41 @@ func (r *MySQLRepository) SearchMarketByCoordinates(lat float64, lng float64) (*
 
 func (r *MySQLRepository) IdetificarProduto(produto *produtos.ProdutoFoto) (*produtos.Produto, error) {
 	return &produtos.Produto{}, nil
+}
+
+func (r *MySQLRepository) ConfirmarValor(data *mercadoprodutos.MercadoProdutos, userId string) (int64, error) {
+
+	mercado_produto := &mercadoprodutos.MercadoProdutos{} // aloca memória
+
+	row := r.db.QueryRow(`
+		SELECT id, id_mercado, id_produto, preco_unitario, nivel_confianca, created_at, modified_at, deleted_at
+		FROM mercado_produtos WHERE id_mercado = ? AND id_produto = ?
+	`, data.MercadoID, data.ProdutoID)
+
+	err := row.Scan(
+		&mercado_produto.ID,
+		&mercado_produto.MercadoID,
+		&mercado_produto.ProdutoID,
+		&mercado_produto.PrecoUnitario,
+		&mercado_produto.NivelConfianca,
+		&mercado_produto.CreatedAt,
+		&mercado_produto.ModifiedAt,
+		&mercado_produto.DeletedAt,
+	)
+
+	if err != nil {
+		return 0, err
+	}
+	novoNivel := mercado_produto.NivelConfianca + 10
+	if novoNivel > 100 {
+		novoNivel = 100
+	}
+
+	if mercado_produto.PrecoUnitario != data.PrecoUnitario {
+		_, err := r.db.Exec("UPDATE mercado_produtos SET preco_unitario = ?, nivel_confianca = ? WHERE id = ?", data.PrecoUnitario, novoNivel, mercado_produto.ID)
+		return mercado_produto.ID, err
+	} else {
+		_, err := r.db.Exec("UPDATE mercado_produtos SET nivel_confianca = ? WHERE id = ?", novoNivel, mercado_produto.ID)
+		return mercado_produto.ID, err
+	}
 }
