@@ -84,7 +84,7 @@ func PubConfirmaValor(mercadoProdutoId int64, userID string) error {
 	if err != nil {
 		return fmt.Errorf("erro ao codificar payload: %v", err)
 	}
-	_, err = rdb.Publish(ctx, "confirma_valor_mercado_produto", string(payload)).Result()
+	_, err = rdb.Publish(ctx, "confirma_valor_mercado_produto", string(payload)).Result() //FALTA CRIAR O SUB NO SERVIÇO DE LOG
 	if err != nil {
 		return fmt.Errorf("erro ao publicar mensagem no Redis: %v", err)
 	}

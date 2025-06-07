@@ -3,8 +3,8 @@ package dto
 import mercadoprodutos "main/internal/domain/mercado_produtos"
 
 type ConfirmaMercadoProdutoDTO struct {
-	IdProduto int64   `json:"nome" validate:"required"`
-	IdMercado int64   `json:"marca" validate:"required"`
+	IdProduto int64   `json:"id_produto" validate:"required"`
+	IdMercado int64   `json:"id_mercado" validate:"required"`
 	Preco     float32 `json:"preco" validate:"required"`
 }
 
