@@ -193,3 +193,55 @@ func (r *MySQLRepository) ConfirmarValor(data *mercadoprodutos.MercadoProdutos, 
 		return mercado_produto.ID, err
 	}
 }
+
+func (r *MySQLRepository) GetMarketsByProduct(produto *produtos.Produto) ([]*mercadoprodutos.MercadoProdutosCompleto, error) {
+	var mercadosList []*mercadoprodutos.MercadoProdutosCompleto
+
+	rows, err := r.db.Query(`
+		SELECT m.id, m.nome, m.endereco, m.cidade, m.bairro, m.numero, m.latitude, m.longitude, m.status,
+			   mp.id as id_mercado_produtos, mp.preco_unitario, mp.nivel_confianca, mp.created_at, mp.modified_at
+		FROM mercado_produtos mp
+		INNER JOIN mercados m ON m.id = mp.id_mercado
+		WHERE mp.id_produto = ?
+	`, produto.ID)
+	if err != nil {
+		return nil, fmt.Errorf("GetMarketsByProduct.Query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var m mercados.Mercado
+		var mp mercadoprodutos.MercadoProdutosCompleto
+
+		err := rows.Scan(
+			&m.ID,
+			&m.Nome,
+			&m.Endereco,
+			&m.Cidade,
+			&m.Bairro,
+			&m.Numero,
+			&m.Latitude,
+			&m.Longitude,
+			&m.Status,
+			&mp.ID,
+			&mp.PrecoUnitario,
+			&mp.NivelConfianca,
+			&mp.CreatedAt,
+			&mp.ModifiedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("GetMarketsByProduct.Scan: %w", err)
+		}
+
+		mp.Produto = produto
+		mp.Mercado = &m
+
+		mercadosList = append(mercadosList, &mp)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("GetMarketsByProduct.RowsErr: %w", err)
+	}
+
+	return mercadosList, nil
+}

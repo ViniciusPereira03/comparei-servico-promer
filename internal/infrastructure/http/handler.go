@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/gorilla/mux"
 )
 
 var service *app.ProdutosService
@@ -165,4 +166,17 @@ func ConfirmarValor(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode("Confirmado")
+}
+
+func SearchProductByBarCode(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	barcode := vars["barcode"]
+
+	mercados, err := service.SearchProductsByBarcode(barcode)
+	if err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err, err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(mercados)
 }

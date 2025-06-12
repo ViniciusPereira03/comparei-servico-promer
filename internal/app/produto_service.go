@@ -294,3 +294,15 @@ func extractJSONFromParts(parts []string) (string, error) {
 	}
 	return parts[0], nil
 }
+
+func (s *ProdutosService) SearchProductsByBarcode(barcode string) ([]*mercadoprodutos.MercadoProdutosCompleto, error) {
+
+	produto, err := s.mysqlRepo.GetProductByBarcode(barcode)
+	if err != nil {
+		return []*mercadoprodutos.MercadoProdutosCompleto{}, fmt.Errorf("Produto não encontrado")
+	}
+
+	mercados, err := s.mysqlRepo.GetMarketsByProduct(produto)
+
+	return mercados, nil
+}

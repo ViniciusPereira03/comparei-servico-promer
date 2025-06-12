@@ -13,4 +13,5 @@ type ProdutosRepository interface {
 	UpdateMarketProduct(mercado_produtos *mercadoprodutos.MercadoProdutos) error
 	GetProductByBarcode(barcode string) (*produtos.Produto, error)
 	IdetificarProduto(produto *produtos.ProdutoFoto) (*produtos.Produto, error)
+	GetMarketsByProduct(produto *produtos.Produto) ([]*mercadoprodutos.MercadoProdutosCompleto, error)
 }
