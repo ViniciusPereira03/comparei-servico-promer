@@ -103,6 +103,49 @@ func (r *MySQLRepository) GetProductByBarcode(barcode string) (*produtos.Produto
 	return &p, nil
 }
 
+func (r *MySQLRepository) SearchProductsByText(text string) ([]produtos.Produto, error) {
+	var produtosList []produtos.Produto
+
+	// Monta o pattern para o LIKE
+	likePattern := "%" + text + "%"
+
+	rows, err := r.db.Query(`
+		SELECT id, nome, marca, quantidade, unidade, bar_code, created_at, modified_at, deleted_at
+		FROM produtos
+		WHERE nome LIKE ? OR marca LIKE ?
+	`, likePattern, likePattern)
+	if err != nil {
+		return nil, fmt.Errorf("SearchProductsByText.Query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var p produtos.Produto
+		err := rows.Scan(
+			&p.ID,
+			&p.Nome,
+			&p.Marca,
+			&p.Quantidade,
+			&p.Unidade,
+			&p.BarCode,
+			&p.CreatedAt,
+			&p.ModifiedAt,
+			&p.DeletedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("SearchProductsByText.Scan: %w", err)
+		}
+		produtosList = append(produtosList, p)
+	}
+
+	// Checa se houve algum erro durante a iteração
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("SearchProductsByText.rows.Err: %w", err)
+	}
+
+	return produtosList, nil
+}
+
 func (r *MySQLRepository) CreateMarket(mercado *mercados.Mercado) (int64, error) {
 	point := fmt.Sprintf("POINT(%f %f)", mercado.Longitude, mercado.Latitude)
 

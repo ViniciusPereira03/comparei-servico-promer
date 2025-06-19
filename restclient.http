@@ -56,3 +56,9 @@ get {{host}}/produto/barcode/324523453452
 Content-Type: application/json
 apiKey: {{apiKey}}
 Authorization: Bearer {{token}}
+
+###
+get {{host}}/produto/search?text=coca
+Content-Type: application/json
+apiKey: {{apiKey}}
+Authorization: Bearer {{token}}

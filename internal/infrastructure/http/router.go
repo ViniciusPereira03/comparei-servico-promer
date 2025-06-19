@@ -20,6 +20,7 @@ func NewRouter(produtosService *app.ProdutosService) *mux.Router {
 	r.HandleFunc("/mercados", GetMarketByCoordinates).Methods("GET")
 	r.HandleFunc("/mercado/produto/confirmar", ConfirmarValor).Methods("POST")
 	r.HandleFunc("/produto/barcode/{barcode}", SearchProductByBarCode).Methods("GET")
+	r.HandleFunc("/produto/search", SearchProductsByText).Methods("GET")
 
 	return r
 }

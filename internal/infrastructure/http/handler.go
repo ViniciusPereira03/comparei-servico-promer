@@ -180,3 +180,15 @@ func SearchProductByBarCode(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(mercados)
 }
+
+func SearchProductsByText(w http.ResponseWriter, r *http.Request) {
+	text := r.URL.Query().Get("text")
+
+	mercados, err := service.SearchProductsByText(text)
+	if err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err, err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(mercados)
+}

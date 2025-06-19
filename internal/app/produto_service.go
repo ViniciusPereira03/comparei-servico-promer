@@ -306,3 +306,20 @@ func (s *ProdutosService) SearchProductsByBarcode(barcode string) ([]*mercadopro
 
 	return mercados, nil
 }
+
+func (s *ProdutosService) SearchProductsByText(text string) ([]*mercadoprodutos.MercadoProdutosCompleto, error) {
+
+	produtos, err := s.mysqlRepo.SearchProductsByText(text)
+	if err != nil {
+		return []*mercadoprodutos.MercadoProdutosCompleto{}, fmt.Errorf("Produto não encontrado")
+	}
+
+	var mercados []*mercadoprodutos.MercadoProdutosCompleto
+
+	for _, produto := range produtos {
+		mkts, _ := s.mysqlRepo.GetMarketsByProduct(&produto)
+		mercados = append(mercados, mkts...)
+	}
+
+	return mercados, nil
+}
