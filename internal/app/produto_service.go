@@ -83,7 +83,12 @@ func (s *ProdutosService) CreateProduct(product *produtos.Produto, userId string
 		if err != nil {
 			return 0, err
 		}
-		err_pub := publisher.PubNewProduct(idMercadoProduto, userId)
+
+		mercadoProduto, err := s.GetMarketProductId(idMercadoProduto)
+		if err != nil {
+			return 0, err
+		}
+		err_pub := publisher.PubNewProduct(mercadoProduto, userId)
 		if err_pub != nil {
 			log.Println("[ERRO PUB] ", err_pub)
 		}
@@ -117,6 +122,10 @@ func (s *ProdutosService) CreateMarketProduct(mercado *mercados.Mercado, produto
 
 func (s *ProdutosService) GetMarketProduct(mercadoId int64, produtoId int64) (*mercadoprodutos.MercadoProdutos, error) {
 	return s.mysqlRepo.GetMarketProduct(mercadoId, produtoId)
+}
+
+func (s *ProdutosService) GetMarketProductId(mercadoProdutoId int64) (*mercadoprodutos.MercadoProdutos, error) {
+	return s.mysqlRepo.GetMarketProductId(mercadoProdutoId)
 }
 
 func (s *ProdutosService) UpdateMarketProduct(mercado_produto *mercadoprodutos.MercadoProdutos) error {

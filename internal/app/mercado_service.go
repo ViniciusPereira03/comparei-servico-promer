@@ -84,11 +84,19 @@ func (s *MercadoService) SearchMarketByCoordinates(lat float64, lng float64) (*m
 	return s.mysqlRepo.SearchMarketByCoordinates(lat, lng)
 }
 
+func (s *MercadoService) GetMarketProductId(mercadoProdutoId int64) (*mercadoprodutos.MercadoProdutos, error) {
+	return s.mysqlRepo.GetMarketProductId(mercadoProdutoId)
+}
+
 func (s *MercadoService) ConfirmarValor(data *mercadoprodutos.MercadoProdutos, userId string) (int64, error) {
 	idMercadoProduto, err := s.mysqlRepo.ConfirmarValor(data, userId)
 
 	if err == nil && idMercadoProduto > 0 {
-		err_pub := publisher.PubNewProduct(idMercadoProduto, userId)
+		mercaddoProduto, err := s.GetMarketProductId(idMercadoProduto)
+		if err != nil {
+			return 0, err
+		}
+		err_pub := publisher.PubNewProduct(mercaddoProduto, userId)
 		if err_pub != nil {
 			log.Println("[ERRO PUB] ", err_pub)
 		}

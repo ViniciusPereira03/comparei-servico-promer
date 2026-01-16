@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/config"
+	mercadoprodutos "main/internal/domain/mercado_produtos"
 	"os"
 
 	"github.com/go-redis/redis/v8"
@@ -20,17 +21,27 @@ func init() {
 	})
 }
 
-func PubNewProduct(mercadoProdutoId int64, userID string) error {
+func PubNewProduct(mercadoProduto *mercadoprodutos.MercadoProdutos, userID string) error {
 	ctx := context.Background()
 
 	type payload_log struct {
-		Id     int64  `json:"id"`
-		UserID string `json:"user_id"`
+		Id               int64   `json:"id"`
+		MercadoProdutoId int64   `json:"mercado_produto_id"`
+		UserID           string  `json:"user_id"`
+		PrecoUnitario    float32 `json:"preco_unitario"`
+		NivelConfianca   int32   `json:"nivel_confianca"`
+		MercadoId        int64   `json:"mercado_id"`
+		ProdutoID        int64   `json:"produto_id"`
 	}
 
 	var p payload_log
-	p.Id = mercadoProdutoId
+	p.Id = mercadoProduto.ID
+	p.MercadoProdutoId = mercadoProduto.ID
 	p.UserID = userID
+	p.PrecoUnitario = mercadoProduto.PrecoUnitario
+	p.NivelConfianca = mercadoProduto.NivelConfianca
+	p.MercadoId = mercadoProduto.MercadoID
+	p.ProdutoID = mercadoProduto.ProdutoID
 
 	payload, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {

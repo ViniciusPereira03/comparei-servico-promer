@@ -9,5 +9,6 @@ type MercadosRepository interface {
 	CreateMarket(mercado *mercados.Mercado) (int64, error)
 	GetMarketByCoordinates(lat float64, lng float64) (mercados.PlaceGoogle, error)
 	SearchMarketByCoordinates(lat float64, lng float64) (*mercados.Mercado, error)
+	GetMarketProductId(mercadoProdutoId int64) (*mercadoprodutos.MercadoProdutos, error)
 	ConfirmarValor(data *mercadoprodutos.MercadoProdutos, userId string) (int64, error)
 }
