@@ -160,7 +160,8 @@ func (s *ProdutosService) IdetificarProduto(produto *produtos.ProdutoFoto) (*pro
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.5-flash")
+	// model := client.GenerativeModel("gemini-1.5-flash")
+	model := client.GenerativeModel("gemini-2.5-flash-lite")
 
 	imgData1, err := os.ReadFile(caminho)
 	if err != nil {
