@@ -6,6 +6,7 @@ import (
 	mercadoprodutos "main/internal/domain/mercado_produtos"
 	"main/internal/domain/mercados"
 	"main/internal/domain/produtos"
+	"main/internal/domain/user"
 )
 
 type MySQLRepository struct {
@@ -54,6 +55,32 @@ func (r *MySQLRepository) GetMarketProduct(mercadoId int64, produtoId int64) (*m
 		SELECT id, id_mercado, id_produto, preco_unitario, nivel_confianca, created_at, modified_at, deleted_at
 		FROM mercado_produtos WHERE id_mercado = ? AND id_produto = ?
 	`, mercadoId, produtoId)
+
+	err := row.Scan(
+		&mercado_produto.ID,
+		&mercado_produto.MercadoID,
+		&mercado_produto.ProdutoID,
+		&mercado_produto.PrecoUnitario,
+		&mercado_produto.NivelConfianca,
+		&mercado_produto.CreatedAt,
+		&mercado_produto.ModifiedAt,
+		&mercado_produto.DeletedAt,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("GetMarketProduct.Scan: %w", err)
+	}
+
+	return mercado_produto, nil
+}
+
+func (r *MySQLRepository) GetMarketProductId(mercadoProdutoId int64) (*mercadoprodutos.MercadoProdutos, error) {
+	mercado_produto := &mercadoprodutos.MercadoProdutos{} // aloca memória
+
+	row := r.db.QueryRow(`
+		SELECT id, id_mercado, id_produto, preco_unitario, nivel_confianca, created_at, modified_at, deleted_at
+		FROM mercado_produtos WHERE id = ?
+	`, mercadoProdutoId)
 
 	err := row.Scan(
 		&mercado_produto.ID,
@@ -287,4 +314,10 @@ func (r *MySQLRepository) GetMarketsByProduct(produto *produtos.Produto) ([]*mer
 	}
 
 	return mercadosList, nil
+}
+
+// Users
+func (r *MySQLRepository) CreateUser(user *user.User) error {
+	_, err := r.db.Exec("INSERT INTO users (id, ray_distance, status) VALUES (?, ?, ?)", user.ID, user.RayDistance, user.Status)
+	return err
 }

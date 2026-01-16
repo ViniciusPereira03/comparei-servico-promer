@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"main/config"
 	"main/internal/app"
 	customHTTP "main/internal/infrastructure/http"
+	"main/internal/infrastructure/messaging/subscriber"
 	"main/internal/infrastructure/repository"
 	"os"
 	"time"
@@ -74,6 +76,15 @@ func main() {
 	)
 	mercadoService := app.NewMercadoService(mysqlRepo)
 	productService := app.NewProductsService(mysqlRepo, mercadoService, mongoRepo)
+	userService := app.NewUserService(mysqlRepo)
+
+	subscriber.SetUserService(userService)
+
+	// Iniciar o subscriber (rodar ouvindo eventos)
+	go func() {
+		fmt.Println("📡 Inicializando subscriber...")
+		subscriber.Run()
+	}()
 
 	// Iniciar o servidor HTTP
 	customHTTP.IniHandlers(productService, mercadoService)
