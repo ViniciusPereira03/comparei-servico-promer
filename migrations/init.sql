@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS promerdb;
+USE promerdb;
 
--- Tabela de produtos
-CREATE TABLE IF NOT EXISTS produtos (
+CREATE TABLE produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     marca VARCHAR(255) NOT NULL,
@@ -11,10 +11,9 @@ CREATE TABLE IF NOT EXISTS produtos (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at DATETIME NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabela de mercados
-CREATE TABLE IF NOT EXISTS mercados (
+CREATE TABLE mercados (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     endereco VARCHAR(255) NOT NULL,
@@ -29,18 +28,26 @@ CREATE TABLE IF NOT EXISTS mercados (
     modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at DATETIME NULL,
     SPATIAL INDEX idx_local (local)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabela de produtos do mercado
-CREATE TABLE IF NOT EXISTS mercado_produtos (
+CREATE TABLE mercado_produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_mercado INT NOT NULL,
     id_produto INT NOT NULL,
-    preco_unitario DOUBLE(10, 2) NOT NULL,
+    preco_unitario DECIMAL(10,2) NOT NULL,
     nivel_confianca INT DEFAULT 100,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at DATETIME NULL,
-    FOREIGN KEY (id_mercado) REFERENCES mercados(id),
-    FOREIGN KEY (id_produto) REFERENCES produtos(id)
-);
+    CONSTRAINT fk_mercado FOREIGN KEY (id_mercado) REFERENCES mercados(id),
+    CONSTRAINT fk_produto FOREIGN KEY (id_produto) REFERENCES produtos(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE users (
+    id VARCHAR(255) PRIMARY KEY,
+    status INT NOT NULL,
+    ray_distance INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
