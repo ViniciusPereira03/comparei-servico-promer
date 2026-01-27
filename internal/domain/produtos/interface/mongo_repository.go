@@ -1,6 +1,6 @@
 package produtos_interface
 
 type MongoRepository interface {
-	SaveImage(image string, nome string) error
-	GetImageByName(nome string) (string, error)
+	SaveImage(image string, barcode string) error
+	GetImageByBarcode(barcode string) ([]byte, string, error)
 }

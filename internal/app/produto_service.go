@@ -293,6 +293,10 @@ func SalvarImagemBase64(base64String string) (string, error) {
 	return caminhoArquivo, nil
 }
 
+func (s *ProdutosService) GetImageByBarcode(barcode string) ([]byte, string, error) {
+	return s.mongoRepo.GetImageByBarcode(barcode)
+}
+
 func extractJSONFromParts(parts []string) (string, error) {
 	if len(parts) == 0 {
 		return "", fmt.Errorf("nenhum conteúdo encontrado em Parts")

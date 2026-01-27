@@ -23,9 +23,9 @@ func NewMongoRepository(client *mongo.Client, dbName, collectionName string) *Mo
 	return &MongoRepository{collection: coll}
 }
 
-func (r *MongoRepository) SaveImage(base64Image string, nome string) error {
-	if base64Image == "" || nome == "" {
-		return errors.New("imagem ou nome inválido")
+func (r *MongoRepository) SaveImage(base64Image string, barcode string) error {
+	if base64Image == "" || barcode == "" {
+		return errors.New("imagem ou barcode inválido")
 	}
 
 	// Separar o prefixo (tipo MIME) do conteúdo
@@ -55,7 +55,7 @@ func (r *MongoRepository) SaveImage(base64Image string, nome string) error {
 
 	// Cria um documento com os dados da imagem
 	doc := bson.M{
-		"_id":      nome, // Usar nome como ID evita duplicação
+		"_id":      barcode, // Usar barcode como ID evita duplicação
 		"image":    imageBytes,
 		"mimeType": mimeType,
 		"created":  time.Now(),
@@ -63,25 +63,26 @@ func (r *MongoRepository) SaveImage(base64Image string, nome string) error {
 
 	// Substitui se já existir
 	opts := options.Replace().SetUpsert(true)
-	_, err = r.collection.ReplaceOne(context.Background(), bson.M{"_id": nome}, doc, opts)
+	_, err = r.collection.ReplaceOne(context.Background(), bson.M{"_id": barcode}, doc, opts)
 	return err
 }
 
-func (r *MongoRepository) GetImageByName(nome string) (string, error) {
+func (r *MongoRepository) GetImageByBarcode(barcode string) ([]byte, string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	filter := bson.M{"_id": nome}
+	filter := bson.M{"_id": barcode}
 
 	var result struct {
-		ID    string `bson:"_id"`
-		Image string `bson:"image"`
+		ID       string `bson:"_id"`
+		Image    []byte `bson:"image"`
+		MimeType string `bson:"mimeType"`
 	}
 
 	err := r.collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
-		return "", errors.New("imagem não encontrada no banco de dados")
+		return nil, "", errors.New("imagem não encontrada no banco de dados")
 	}
 
-	return result.Image, nil
+	return result.Image, result.MimeType, nil
 }

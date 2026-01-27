@@ -247,4 +247,24 @@ func SearchProductsByText(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Nenhum mercado cadastrado no raio de %d Km", user.RayDistance), http.StatusBadRequest)
 	}
 }
+
+func GetImageByBarcode(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	barcode := vars["barcode"]
+
+	imageBytes, mimeType, err := service.GetImageByBarcode(barcode)
+	if err != nil {
+		sendErrorResponse(w, http.StatusNotFound, err, "Imagem não encontrada")
+		return
+	}
+
+	// Headers corretos para imagem
+	w.Header().Set("Content-Type", mimeType)
+	w.Header().Set("Content-Length", strconv.Itoa(len(imageBytes)))
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+
+	w.WriteHeader(http.StatusOK)
+
+	// Escreve os bytes direto na resposta
+	_, _ = w.Write(imageBytes)
 }
