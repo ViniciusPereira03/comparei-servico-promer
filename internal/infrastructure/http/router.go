@@ -13,14 +13,19 @@ func NewRouter(produtosService *app.ProdutosService) *mux.Router {
 
 	r := mux.NewRouter()
 
-	r.Use(middleware.APIKeyMiddleware)
+	// 🔓 ROTAS PÚBLICAS (sem API key)
+	r.HandleFunc("/produto/image/{barcode}", GetImageByBarcode).Methods("GET")
 
-	r.HandleFunc("/produto", CreateProduct).Methods("POST")
-	r.HandleFunc("/produto/identificar", IdentifyProduct).Methods("POST")
-	r.HandleFunc("/mercados", GetMarketByCoordinates).Methods("GET")
-	r.HandleFunc("/mercado/produto/confirmar", ConfirmarValor).Methods("POST")
-	r.HandleFunc("/produto/barcode/{barcode}", SearchProductByBarCode).Methods("GET")
-	r.HandleFunc("/produto/search", SearchProductsByText).Methods("GET")
+	// 🔒 ROTAS PROTEGIDAS
+	api := r.PathPrefix("/").Subrouter()
+	api.Use(middleware.APIKeyMiddleware)
+
+	api.HandleFunc("/produto", CreateProduct).Methods("POST")
+	api.HandleFunc("/produto/identificar", IdentifyProduct).Methods("POST")
+	api.HandleFunc("/mercados", GetMarketByCoordinates).Methods("GET")
+	api.HandleFunc("/mercado/produto/confirmar", ConfirmarValor).Methods("POST")
+	api.HandleFunc("/produto/barcode/{barcode}", SearchProductByBarCode).Methods("GET")
+	api.HandleFunc("/produto/search", SearchProductsByText).Methods("GET")
 
 	return r
 }
