@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/internal/app"
+	mercadoprodutos "main/internal/domain/mercado_produtos"
 	"main/internal/infrastructure/http/dto"
 	"net/http"
 	"os"
@@ -15,10 +16,12 @@ import (
 
 var service *app.ProdutosService
 var mercado_service *app.MercadoService
+var user_service *app.UserService
 
-func IniHandlers(produtosService *app.ProdutosService, mercadoService *app.MercadoService) {
+func IniHandlers(produtosService *app.ProdutosService, mercadoService *app.MercadoService, userService *app.UserService) {
 	service = produtosService
 	mercado_service = mercadoService
+	user_service = userService
 }
 
 func sendErrorResponse(w http.ResponseWriter, statusCode int, err error, message string) {

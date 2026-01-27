@@ -87,7 +87,7 @@ func main() {
 	}()
 
 	// Iniciar o servidor HTTP
-	customHTTP.IniHandlers(productService, mercadoService)
+	customHTTP.IniHandlers(productService, mercadoService, userService)
 	router := customHTTP.NewRouter(productService)
 
 	// Inicia o servidor HTTP

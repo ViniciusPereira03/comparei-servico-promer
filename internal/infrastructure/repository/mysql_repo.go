@@ -380,3 +380,29 @@ func (r *MySQLRepository) CreateUser(user *user.User) error {
 	_, err := r.db.Exec("INSERT INTO users (id, ray_distance, status) VALUES (?, ?, ?)", user.ID, user.RayDistance, user.Status)
 	return err
 }
+
+func (r *MySQLRepository) EditUser(user *user.User) error {
+	_, err := r.db.Exec("UPDATE users SET ray_distance = ?, status = ? WHERE id = ?", user.RayDistance, user.Status, user.ID)
+	return err
+}
+
+func (r *MySQLRepository) GetUser(id string) (*user.User, error) {
+	user := &user.User{} // aloca memória
+
+	row := r.db.QueryRow(`
+		SELECT id, ray_distance, status
+		FROM users WHERE id = ? and deleted_at IS NULL
+	`, id)
+
+	err := row.Scan(
+		&user.ID,
+		&user.RayDistance,
+		&user.Status,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("GetUser.Scan: %w", err)
+	}
+
+	return user, nil
+}
