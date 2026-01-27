@@ -194,17 +194,17 @@ func (r *MySQLRepository) CreateMarket(mercado *mercados.Mercado) (int64, error)
 	return id, nil
 }
 
-func (r *MySQLRepository) GetMarketByCoordinates(lat float64, lng float64) (mercados.PlaceGoogle, error) {
+func (r *MySQLRepository) GetMarketByCoordinates(lat float64, lng float64, radius int) (mercados.PlaceGoogle, error) {
 	return mercados.PlaceGoogle{}, nil
 }
 
-func (r *MySQLRepository) SearchMarketByCoordinates(lat float64, lng float64) (*mercados.Mercado, error) {
+func (r *MySQLRepository) SearchMarketByCoordinates(lat float64, lng float64, radius int) (*mercados.Mercado, error) {
 	var m mercados.Mercado
 	row := r.db.QueryRow(`
 		SELECT id, nome, endereco, cidade, bairro, numero, ST_X(local) as latitude, ST_Y(local) as longitude, status
 		FROM mercados
-		WHERE ST_Distance_Sphere(local, POINT(?, ?)) <= 50
-	`, lng, lat)
+		WHERE ST_Distance_Sphere(local, POINT(?, ?)) <= ?
+	`, lng, lat, radius)
 
 	err := row.Scan(
 		&m.ID,
@@ -221,6 +221,65 @@ func (r *MySQLRepository) SearchMarketByCoordinates(lat float64, lng float64) (*
 		return &mercados.Mercado{}, fmt.Errorf("GetMarketByCoordinates.Scan: %w", err)
 	}
 	return &m, nil
+}
+
+func (r *MySQLRepository) SearchMarketsByCoordinates(
+	lat float64,
+	lng float64,
+	radius int,
+) ([]mercados.Mercado, error) {
+	fmt.Println(fmt.Sprintf("BUSCANDO MERCADOS EM %v %v %vKm", lat, lng, radius))
+	var mercadosEncontrados []mercados.Mercado
+
+	// Converte KM para metros
+	radiusMeters := radius * 1000
+
+	rows, err := r.db.Query(`
+		SELECT 
+			id,
+			nome,
+			endereco,
+			cidade,
+			bairro,
+			numero,
+			ST_X(local) AS latitude,
+			ST_Y(local) AS longitude,
+			status
+		FROM mercados
+		WHERE ST_Distance_Sphere(local, POINT(?, ?)) <= ?
+	`, lng, lat, radiusMeters)
+	if err != nil {
+		return nil, fmt.Errorf("SearchMarketByCoordinates.Query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var m mercados.Mercado
+
+		err := rows.Scan(
+			&m.ID,
+			&m.Nome,
+			&m.Endereco,
+			&m.Cidade,
+			&m.Bairro,
+			&m.Numero,
+			&m.Latitude,
+			&m.Longitude,
+			&m.Status,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("SearchMarketByCoordinates.Scan: %w", err)
+		}
+
+		mercadosEncontrados = append(mercadosEncontrados, m)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("SearchMarketByCoordinates.Rows: %w", err)
+	}
+
+	fmt.Println("mercadosEncontrados: ", mercadosEncontrados)
+	return mercadosEncontrados, nil
 }
 
 func (r *MySQLRepository) IdetificarProduto(produto *produtos.ProdutoFoto) (*produtos.Produto, error) {

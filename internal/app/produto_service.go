@@ -47,9 +47,10 @@ func NewProductsService(
 
 func (s *ProdutosService) CreateProduct(product *produtos.Produto, userId string) (int64, error) {
 
-	mercado, err := s.mercadoService.SearchMarketByCoordinates(product.Latitude, product.Longitude)
+	radius := 100
+	mercado, err := s.mercadoService.SearchMarketByCoordinates(product.Latitude, product.Longitude, radius)
 	if err != nil {
-		mkt, err := s.mercadoService.GetMarketByCoordinates(product.Latitude, product.Longitude)
+		mkt, err := s.mercadoService.GetMarketByCoordinates(product.Latitude, product.Longitude, radius)
 		if err != nil {
 			return 0, err
 		}

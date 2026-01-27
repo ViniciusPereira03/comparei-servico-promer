@@ -25,7 +25,7 @@ func (s *MercadoService) CreateMarket(mercado *mercados.Mercado) (int64, error) 
 	return s.mysqlRepo.CreateMarket(mercado)
 }
 
-func (s *MercadoService) GetMarketByCoordinates(lat float64, lng float64) (mercados.PlaceGoogle, error) {
+func (s *MercadoService) GetMarketByCoordinates(lat float64, lng float64, radius int) (mercados.PlaceGoogle, error) {
 	ctx := context.Background()
 
 	apiKey := os.Getenv("GOOGLE_MAPS_API_KEY")
@@ -39,7 +39,6 @@ func (s *MercadoService) GetMarketByCoordinates(lat float64, lng float64) (merca
 
 	var mkt mercados.PlaceGoogle
 
-	radius := 100
 	req := &maps.NearbySearchRequest{
 		Location: &maps.LatLng{Lat: lat, Lng: lng},
 
@@ -80,8 +79,12 @@ func (s *MercadoService) GetMarketByCoordinates(lat float64, lng float64) (merca
 	return mkt, nil
 }
 
-func (s *MercadoService) SearchMarketByCoordinates(lat float64, lng float64) (*mercados.Mercado, error) {
-	return s.mysqlRepo.SearchMarketByCoordinates(lat, lng)
+func (s *MercadoService) SearchMarketByCoordinates(lat float64, lng float64, radius int) (*mercados.Mercado, error) {
+	return s.mysqlRepo.SearchMarketByCoordinates(lat, lng, radius)
+}
+
+func (s *MercadoService) SearchMarketsByCoordinates(lat float64, lng float64, radius int) ([]mercados.Mercado, error) {
+	return s.mysqlRepo.SearchMarketsByCoordinates(lat, lng, radius)
 }
 
 func (s *MercadoService) GetMarketProductId(mercadoProdutoId int64) (*mercadoprodutos.MercadoProdutos, error) {
@@ -92,11 +95,11 @@ func (s *MercadoService) ConfirmarValor(data *mercadoprodutos.MercadoProdutos, u
 	idMercadoProduto, err := s.mysqlRepo.ConfirmarValor(data, userId)
 
 	if err == nil && idMercadoProduto > 0 {
-		mercaddoProduto, err := s.GetMarketProductId(idMercadoProduto)
+		mercadoProduto, err := s.GetMarketProductId(idMercadoProduto)
 		if err != nil {
 			return 0, err
 		}
-		err_pub := publisher.PubNewProduct(mercaddoProduto, userId)
+		err_pub := publisher.PubConfirmaValor(mercadoProduto.ID, userId)
 		if err_pub != nil {
 			log.Println("[ERRO PUB] ", err_pub)
 		}
