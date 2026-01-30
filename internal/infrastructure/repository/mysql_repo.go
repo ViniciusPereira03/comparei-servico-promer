@@ -228,11 +228,8 @@ func (r *MySQLRepository) SearchMarketsByCoordinates(
 	lng float64,
 	radius int,
 ) ([]mercados.Mercado, error) {
-	fmt.Println(fmt.Sprintf("BUSCANDO MERCADOS EM %v %v %vKm", lat, lng, radius))
+	fmt.Println(fmt.Sprintf("BUSCANDO MERCADOS EM %v %v %vm", lat, lng, radius))
 	var mercadosEncontrados []mercados.Mercado
-
-	// Converte KM para metros
-	radiusMeters := radius * 1000
 
 	rows, err := r.db.Query(`
 		SELECT 
@@ -247,7 +244,7 @@ func (r *MySQLRepository) SearchMarketsByCoordinates(
 			status
 		FROM mercados
 		WHERE ST_Distance_Sphere(local, POINT(?, ?)) <= ?
-	`, lng, lat, radiusMeters)
+	`, lng, lat, radius)
 	if err != nil {
 		return nil, fmt.Errorf("SearchMarketByCoordinates.Query: %w", err)
 	}
@@ -373,6 +370,31 @@ func (r *MySQLRepository) GetMarketsByProduct(produto *produtos.Produto) ([]*mer
 	}
 
 	return mercadosList, nil
+}
+
+func (r *MySQLRepository) GetMarketByID(marketID int64) (*mercados.Mercado, error) {
+	var m mercados.Mercado
+	row := r.db.QueryRow(`
+		SELECT id, nome, endereco, cidade, bairro, numero, ST_X(local) as latitude, ST_Y(local) as longitude, status
+		FROM mercados
+		WHERE id = ?
+	`, marketID)
+
+	err := row.Scan(
+		&m.ID,
+		&m.Nome,
+		&m.Endereco,
+		&m.Cidade,
+		&m.Bairro,
+		&m.Numero,
+		&m.Latitude,
+		&m.Longitude,
+		&m.Status,
+	)
+	if err != nil {
+		return &mercados.Mercado{}, fmt.Errorf("GetMarketByID.Scan: %w", err)
+	}
+	return &m, nil
 }
 
 // Users

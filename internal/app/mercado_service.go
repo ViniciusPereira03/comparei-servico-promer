@@ -79,6 +79,10 @@ func (s *MercadoService) GetMarketByCoordinates(lat float64, lng float64, radius
 	return mkt, nil
 }
 
+func (s *MercadoService) GetMarketByID(marketID int64) (*mercados.Mercado, error) {
+	return s.mysqlRepo.GetMarketByID(marketID)
+}
+
 func (s *MercadoService) SearchMarketByCoordinates(lat float64, lng float64, radius int) (*mercados.Mercado, error) {
 	return s.mysqlRepo.SearchMarketByCoordinates(lat, lng, radius)
 }

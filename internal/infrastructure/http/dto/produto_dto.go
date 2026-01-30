@@ -12,6 +12,7 @@ type CreateProductDTO struct {
 	Longitude  float64 `json:"longitude" validate:"required"`
 	Preco      float32 `json:"preco" validate:"required"`
 	Foto       string  `json:"foto" validate:"required"`
+	MercadoID  int64   `json:"mercado_id"`
 }
 
 func (dto *CreateProductDTO) ParseToProduct() *produtos.Produto {

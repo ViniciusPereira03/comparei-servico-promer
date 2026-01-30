@@ -7,6 +7,7 @@ import (
 
 type MercadosRepository interface {
 	CreateMarket(mercado *mercados.Mercado) (int64, error)
+	GetMarketByID(marketID int64) (*mercados.Mercado, error)
 	GetMarketByCoordinates(lat float64, lng float64, radius int) (mercados.PlaceGoogle, error)
 	SearchMarketByCoordinates(lat float64, lng float64, radius int) (*mercados.Mercado, error)
 	SearchMarketsByCoordinates(lat float64, lng float64, radius int) ([]mercados.Mercado, error)

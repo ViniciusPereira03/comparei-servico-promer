@@ -80,7 +80,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	produto := produtoDTO.ParseToProduct()
-	id, err := service.CreateProduct(produto, userID)
+	id, err := service.CreateProduct(produto, produtoDTO.MercadoID, userID)
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err, "Erro ao refistrar log")
 		return
@@ -114,18 +114,41 @@ func IdentifyProduct(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetMarketByCoordinates(w http.ResponseWriter, r *http.Request) {
-	userID, err_token := validaToken(w, r)
+func CreateMarket(w http.ResponseWriter, r *http.Request) {
+	_, err_token := validaToken(w, r)
 	if err_token != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err_token, "Erro ao refistrar log")
 		return
 	}
 
-	user, err_user := user_service.GetUser(userID)
-	if err_user != nil {
-		sendErrorResponse(w, http.StatusInternalServerError, err_user, "Erro ao refistrar log")
+	var body dto.MercadoDTO
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err, "JSON inválido")
 		return
 	}
+
+	mercadoID, err := mercado_service.CreateMarket(body.ParseToMarket())
+	if err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err, "JSON inválido")
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(fmt.Sprintf("Mercado %v cadastrado com sucesso!", mercadoID))
+}
+
+func GetMarketByCoordinates(w http.ResponseWriter, r *http.Request) {
+	// userID, err_token := validaToken(w, r)
+	// if err_token != nil {
+	// 	sendErrorResponse(w, http.StatusInternalServerError, err_token, "Erro ao refistrar log")
+	// 	return
+	// }
+
+	// user, err_user := user_service.GetUser(userID)
+	// if err_user != nil {
+	// 	sendErrorResponse(w, http.StatusInternalServerError, err_user, "Erro ao refistrar log")
+	// 	return
+	// }
 
 	latStr := r.URL.Query().Get("lat")
 	lngStr := r.URL.Query().Get("lng")
@@ -145,12 +168,18 @@ func GetMarketByCoordinates(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mercados, err := mercado_service.GetMarketByCoordinates(lat, lng, user.RayDistance)
+	mercadosRegiao, err := mercado_service.SearchMarketsByCoordinates(lat, lng, 200)
+	if err == nil {
+		json.NewEncoder(w).Encode(mercadosRegiao)
+		return
+	}
+
+	mercados, err := mercado_service.GetMarketByCoordinates(lat, lng, 200)
 	if err != nil {
 		sendErrorResponse(w, http.StatusBadRequest, err, "JSON inválido")
 	}
 
-	json.NewEncoder(w).Encode(mercados)
+	json.NewEncoder(w).Encode(mercados.ParseToMercado())
 }
 
 func ConfirmarValor(w http.ResponseWriter, r *http.Request) {
@@ -218,7 +247,9 @@ func SearchProductsByText(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mercadosRegiao, err := mercado_service.SearchMarketsByCoordinates(lat, lng, user.RayDistance)
+	radiusMeters := user.RayDistance * 1000
+
+	mercadosRegiao, err := mercado_service.SearchMarketsByCoordinates(lat, lng, radiusMeters)
 	if err != nil {
 		sendErrorResponse(w, http.StatusBadRequest, err, "JSON inválido")
 	}

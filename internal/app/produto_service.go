@@ -45,24 +45,43 @@ func NewProductsService(
 	}
 }
 
-func (s *ProdutosService) CreateProduct(product *produtos.Produto, userId string) (int64, error) {
+func (s *ProdutosService) CreateProduct(product *produtos.Produto, mercadoID int64, userId string) (int64, error) {
 
-	radius := 100
-	mercado, err := s.mercadoService.SearchMarketByCoordinates(product.Latitude, product.Longitude, radius)
-	if err != nil {
-		mkt, err := s.mercadoService.GetMarketByCoordinates(product.Latitude, product.Longitude, radius)
-		if err != nil {
-			return 0, err
+	var mercadoId int64
+	var mercado *mercados.Mercado
+
+	if mercadoID != 0 {
+		mercadoId = int64(mercadoID)
+		mercadoEncontrado, errMercado := s.mercadoService.GetMarketByID(mercadoId)
+		if errMercado != nil {
+			return 0, errMercado
 		}
 
-		mercado = mkt.ParseToMercado()
+		mercado = mercadoEncontrado
+		mercadoId = mercadoEncontrado.ID
 
-		mercadoId, err := s.mercadoService.CreateMarket(mercado)
+	} else {
+		radius := 200 // em metros
+		mercadoEncontrado, err := s.mercadoService.SearchMarketByCoordinates(product.Latitude, product.Longitude, radius)
+
 		if err != nil {
-			return 0, err
+			mkt, err := s.mercadoService.GetMarketByCoordinates(product.Latitude, product.Longitude, radius)
+			if err != nil {
+				return 0, err
+			}
+
+			mercado = mkt.ParseToMercado()
+
+			mercadoNew, err := s.mercadoService.CreateMarket(mercado)
+			if err != nil {
+				return 0, err
+			}
+
+			mercadoId = mercadoNew
 		}
 
-		mercado.ID = mercadoId
+		mercado = mercadoEncontrado
+		mercadoId = mercadoEncontrado.ID
 	}
 
 	var produtoID int64
@@ -78,7 +97,8 @@ func (s *ProdutosService) CreateProduct(product *produtos.Produto, userId string
 	}
 
 	var idMercadoProduto int64
-	mercado_produto, err := s.GetMarketProduct(mercado.ID, product.ID)
+	mercado_produto, err := s.GetMarketProduct(mercadoId, product.ID)
+
 	if err != nil {
 		idMercadoProduto, err = s.CreateMarketProduct(mercado, product)
 		if err != nil {
