@@ -10,6 +10,7 @@ type ProdutosRepository interface {
 	CreateProduct(produto *produtos.Produto) (int64, error)
 	CreateMarketProduct(mercado *mercados.Mercado, produto *produtos.Produto) (int64, error)
 	GetMarketProduct(mercadoId int64, produtoId int64) (*mercadoprodutos.MercadoProdutos, error)
+	GetMarketProductCompleto(mercadoId int64, produtoId int64) (*mercadoprodutos.MercadoProdutosCompleto, error)
 	GetMarketProductId(mercadoProdutoId int64) (*mercadoprodutos.MercadoProdutos, error)
 	UpdateMarketProduct(mercado_produtos *mercadoprodutos.MercadoProdutos) error
 	GetProductByBarcode(barcode string) (*produtos.Produto, error)

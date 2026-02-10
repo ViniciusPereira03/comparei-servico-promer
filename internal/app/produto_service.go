@@ -149,6 +149,56 @@ func (s *ProdutosService) GetMarketProductId(mercadoProdutoId int64) (*mercadopr
 	return s.mysqlRepo.GetMarketProductId(mercadoProdutoId)
 }
 
+func (s *ProdutosService) GetMarketProductCompleto(mercadoId int64, produtoId int64) (*mercadoprodutos.MercadoProdutosCompleto, error) {
+
+	var (
+		produto       *produtos.Produto
+		mercado       *mercados.Mercado
+		marketProduct *mercadoprodutos.MercadoProdutos
+	)
+
+	var g errgroup.Group
+
+	// Consulta produto
+	g.Go(func() error {
+		var err error
+		produto, err = s.mysqlRepo.GetProductByID(produtoId)
+		return err
+	})
+
+	// Consulta mercado
+	g.Go(func() error {
+		var err error
+		mercado, err = s.mysqlRepo.GetMarketByID(mercadoId)
+		return err
+	})
+
+	// Consulta relação mercado-produto
+	g.Go(func() error {
+		var err error
+		marketProduct, err = s.mysqlRepo.GetMarketProduct(mercadoId, produtoId)
+		return err
+	})
+
+	// Espera todas terminarem
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+
+	mp := &mercadoprodutos.MercadoProdutosCompleto{
+		ID:             marketProduct.ID,
+		CreatedAt:      marketProduct.CreatedAt,
+		DeletedAt:      marketProduct.DeletedAt,
+		ModifiedAt:     marketProduct.ModifiedAt,
+		NivelConfianca: marketProduct.NivelConfianca,
+		PrecoUnitario:  marketProduct.PrecoUnitario,
+		Mercado:        mercado,
+		Produto:        produto,
+	}
+
+	return mp, nil
+}
+
 func (s *ProdutosService) UpdateMarketProduct(mercado_produto *mercadoprodutos.MercadoProdutos) error {
 	return s.mysqlRepo.UpdateMarketProduct(mercado_produto)
 }

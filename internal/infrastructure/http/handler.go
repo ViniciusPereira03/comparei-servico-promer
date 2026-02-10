@@ -89,6 +89,32 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(fmt.Sprintf("Produto %v cadastrado com sucesso!", id))
 }
+func GetProductByMarket(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	productIDStr := vars["product_id"]
+	marketIDStr := vars["market_id"]
+
+	productID, err := strconv.ParseInt(productIDStr, 10, 64)
+	if err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err, "ID do produto inválido")
+		return
+	}
+
+	marketID, err := strconv.ParseInt(marketIDStr, 10, 64)
+	if err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err, "ID do mercado inválido")
+		return
+	}
+
+	mercadoProduto, err := service.GetMarketProductCompleto(marketID, productID)
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, err, "Erro ao buscar produto no mercado")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(mercadoProduto)
+}
 
 func IdentifyProduct(w http.ResponseWriter, r *http.Request) {
 	_, err_token := validaToken(w, r)

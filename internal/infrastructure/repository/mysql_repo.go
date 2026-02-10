@@ -422,6 +422,10 @@ func (r *MySQLRepository) GetProductByID(productID int64) (*produtos.Produto, er
 	return &p, nil
 }
 
+func (r *MySQLRepository) GetMarketProductCompleto(mercadoId int64, produtoId int64) (*mercadoprodutos.MercadoProdutosCompleto, error) {
+	return &mercadoprodutos.MercadoProdutosCompleto{}, nil
+}
+
 // Users
 func (r *MySQLRepository) CreateUser(user *user.User) error {
 	_, err := r.db.Exec("INSERT INTO users (id, ray_distance, status) VALUES (?, ?, ?)", user.ID, user.RayDistance, user.Status)
