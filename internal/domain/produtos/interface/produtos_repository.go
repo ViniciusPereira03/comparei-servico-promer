@@ -16,4 +16,5 @@ type ProdutosRepository interface {
 	SearchProductsByText(text string) ([]produtos.Produto, error)
 	IdetificarProduto(produto *produtos.ProdutoFoto) (*produtos.Produto, error)
 	GetMarketsByProduct(produto *produtos.Produto) ([]*mercadoprodutos.MercadoProdutosCompleto, error)
+	GetProductByID(produtoID int64) (*produtos.Produto, error)
 }

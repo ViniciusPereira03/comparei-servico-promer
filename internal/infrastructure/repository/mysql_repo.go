@@ -397,6 +397,31 @@ func (r *MySQLRepository) GetMarketByID(marketID int64) (*mercados.Mercado, erro
 	return &m, nil
 }
 
+func (r *MySQLRepository) GetProductByID(productID int64) (*produtos.Produto, error) {
+	var p produtos.Produto
+	row := r.db.QueryRow(`
+		SELECT id, nome, marca, quantidade, unidade, bar_code, created_at, modified_at, deleted_at 
+		FROM produtos
+		WHERE id = ?
+	`, productID)
+
+	err := row.Scan(
+		&p.ID,
+		&p.Nome,
+		&p.Marca,
+		&p.Quantidade,
+		&p.Unidade,
+		&p.BarCode,
+		&p.CreatedAt,
+		&p.ModifiedAt,
+		&p.DeletedAt,
+	)
+	if err != nil {
+		return &produtos.Produto{}, fmt.Errorf("GetProductByBarcode.Scan: %w", err)
+	}
+	return &p, nil
+}
+
 // Users
 func (r *MySQLRepository) CreateUser(user *user.User) error {
 	_, err := r.db.Exec("INSERT INTO users (id, ray_distance, status) VALUES (?, ?, ?)", user.ID, user.RayDistance, user.Status)
