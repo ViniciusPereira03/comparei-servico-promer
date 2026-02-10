@@ -18,4 +18,5 @@ type ProdutosRepository interface {
 	IdetificarProduto(produto *produtos.ProdutoFoto) (*produtos.Produto, error)
 	GetMarketsByProduct(produto *produtos.Produto) ([]*mercadoprodutos.MercadoProdutosCompleto, error)
 	GetProductByID(produtoID int64) (*produtos.Produto, error)
+	GetMarketByID(mercadoID int64) (*mercados.Mercado, error)
 }
