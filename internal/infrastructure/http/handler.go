@@ -89,6 +89,31 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(fmt.Sprintf("Produto %v cadastrado com sucesso!", id))
 }
+
+func UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	userID, err_token := validaToken(w, r)
+	if err_token != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, err_token, "Erro ao refistrar log")
+		return
+	}
+
+	var produtoDTO dto.UpdateProductDTO
+	if err := json.NewDecoder(r.Body).Decode(&produtoDTO); err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err, "JSON inválido")
+		return
+	}
+
+	produto := produtoDTO.ParseToProduct()
+	err := service.UpdateProduct(produto, produtoDTO.MercadoID, userID)
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, err, "Erro ao refistrar log")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(fmt.Sprintf("Produto %v atualizado com sucesso!", produto.ID))
+}
+
 func GetProductByMarket(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	productIDStr := vars["product_id"]

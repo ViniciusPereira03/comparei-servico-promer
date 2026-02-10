@@ -28,3 +28,16 @@ func (dto *CreateProductDTO) ParseToProduct() *produtos.Produto {
 		Foto:       dto.Foto,
 	}
 }
+
+type UpdateProductDTO struct {
+	ProdutoID int64   `json:"produto_id" validate:"required"`
+	Preco     float32 `json:"preco" validate:"required"`
+	MercadoID int64   `json:"mercado_id"`
+}
+
+func (dto *UpdateProductDTO) ParseToProduct() *produtos.Produto {
+	return &produtos.Produto{
+		ID:    dto.ProdutoID,
+		Preco: dto.Preco,
+	}
+}

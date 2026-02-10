@@ -24,6 +24,7 @@ import (
 	"github.com/google/generative-ai-go/genai"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/api/option"
 )
 
@@ -123,7 +124,7 @@ func (s *ProdutosService) CreateProduct(product *produtos.Produto, mercadoID int
 			return 0, err
 		}
 
-		err_pub := publisher.PubUpdateProduct(idMercadoProduto, userId)
+		err_pub := publisher.PubUpdateProduct(mercado_produto, userId)
 		if err_pub != nil {
 			log.Println("[ERRO PUB] ", err_pub)
 		}
@@ -135,6 +136,31 @@ func (s *ProdutosService) CreateProduct(product *produtos.Produto, mercadoID int
 	}
 
 	return idMercadoProduto, nil
+}
+
+func (s *ProdutosService) UpdateProduct(product *produtos.Produto, mercadoID int64, userId string) error {
+
+	mercado_produto, err := s.GetMarketProduct(mercadoID, product.ID)
+	if err != nil {
+		return err
+	}
+
+	mercado_produto.ProdutoID = product.ID
+	mercado_produto.MercadoID = mercadoID
+	mercado_produto.PrecoUnitario = product.Preco
+	mercado_produto.NivelConfianca = 100
+
+	err = s.UpdateMarketProduct(mercado_produto)
+	if err != nil {
+		return err
+	}
+
+	err_pub := publisher.PubUpdateProduct(mercado_produto, userId)
+	if err_pub != nil {
+		log.Println("[ERRO PUB] ", err_pub)
+	}
+
+	return nil
 }
 
 func (s *ProdutosService) CreateMarketProduct(mercado *mercados.Mercado, produto *produtos.Produto) (int64, error) {

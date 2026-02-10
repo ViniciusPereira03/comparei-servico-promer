@@ -55,17 +55,19 @@ func PubNewProduct(mercadoProduto *mercadoprodutos.MercadoProdutos, userID strin
 	return nil
 }
 
-func PubUpdateProduct(mercadoProdutoId int64, userID string) error {
+func PubUpdateProduct(mercadoProduto *mercadoprodutos.MercadoProdutos, userID string) error {
 	ctx := context.Background()
 
 	type payload_log struct {
-		Id     int64  `json:"id"`
-		UserID string `json:"user_id"`
+		Id             int64                            `json:"id"`
+		UserID         string                           `json:"user_id"`
+		MercadoProduto *mercadoprodutos.MercadoProdutos `json:"mercado_produto"`
 	}
 
 	var p payload_log
-	p.Id = mercadoProdutoId
+	p.Id = mercadoProduto.ID
 	p.UserID = userID
+	p.MercadoProduto = mercadoProduto
 
 	payload, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
