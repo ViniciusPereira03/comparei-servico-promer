@@ -1,0 +1,22 @@
+package produtos_interface
+
+import (
+	mercadoprodutos "main/internal/domain/mercado_produtos"
+	"main/internal/domain/mercados"
+	"main/internal/domain/produtos"
+)
+
+type ProdutosRepository interface {
+	CreateProduct(produto *produtos.Produto) (int64, error)
+	CreateMarketProduct(mercado *mercados.Mercado, produto *produtos.Produto) (int64, error)
+	GetMarketProduct(mercadoId int64, produtoId int64) (*mercadoprodutos.MercadoProdutos, error)
+	GetMarketProductCompleto(mercadoId int64, produtoId int64) (*mercadoprodutos.MercadoProdutosCompleto, error)
+	GetMarketProductId(mercadoProdutoId int64) (*mercadoprodutos.MercadoProdutos, error)
+	UpdateMarketProduct(mercado_produtos *mercadoprodutos.MercadoProdutos) error
+	GetProductByBarcode(barcode string) (*produtos.Produto, error)
+	SearchProductsByText(text string) ([]produtos.Produto, error)
+	IdetificarProduto(produto *produtos.ProdutoFoto) (*produtos.Produto, error)
+	GetMarketsByProduct(produto *produtos.Produto) ([]*mercadoprodutos.MercadoProdutosCompleto, error)
+	GetProductByID(produtoID int64) (*produtos.Produto, error)
+	GetMarketByID(mercadoID int64) (*mercados.Mercado, error)
+}

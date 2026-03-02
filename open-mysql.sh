@@ -1,0 +1,1 @@
+docker exec -it mysql_promer mysql -u root -p

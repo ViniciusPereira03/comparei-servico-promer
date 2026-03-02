@@ -1,0 +1,43 @@
+package dto
+
+import "main/internal/domain/produtos"
+
+type CreateProductDTO struct {
+	Nome       string  `json:"nome" validate:"required"`
+	Marca      string  `json:"marca" validate:"required"`
+	Quantidade float32 `json:"quantidade" validate:"required"`
+	Unidade    string  `json:"unidade" validate:"required"`
+	BarCode    string  `json:"bar_code" validate:"required"`
+	Latitude   float64 `json:"latitude" validate:"required"`
+	Longitude  float64 `json:"longitude" validate:"required"`
+	Preco      float32 `json:"preco" validate:"required"`
+	Foto       string  `json:"foto" validate:"required"`
+	MercadoID  int64   `json:"mercado_id"`
+}
+
+func (dto *CreateProductDTO) ParseToProduct() *produtos.Produto {
+	return &produtos.Produto{
+		Nome:       dto.Nome,
+		Marca:      dto.Marca,
+		Quantidade: dto.Quantidade,
+		Unidade:    dto.Unidade,
+		BarCode:    dto.BarCode,
+		Latitude:   dto.Latitude,
+		Longitude:  dto.Longitude,
+		Preco:      dto.Preco,
+		Foto:       dto.Foto,
+	}
+}
+
+type UpdateProductDTO struct {
+	ProdutoID int64   `json:"produto_id" validate:"required"`
+	Preco     float32 `json:"preco" validate:"required"`
+	MercadoID int64   `json:"mercado_id"`
+}
+
+func (dto *UpdateProductDTO) ParseToProduct() *produtos.Produto {
+	return &produtos.Produto{
+		ID:    dto.ProdutoID,
+		Preco: dto.Preco,
+	}
+}
