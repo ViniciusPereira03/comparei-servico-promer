@@ -82,10 +82,10 @@ Após a execução do script, deves ver as seguintes mensagens no terminal confi
 
 * `/config`: Carregamento e validação das variáveis de ambiente (`.env`).
 * `/internal`: Código privado da aplicação.
-* `/app`: Lógica de negócio e serviços (`produto_service.go`, `mercado_service.go`, etc).
-* `/infrastructure`: Camada de adaptação técnica.
-* `/http`: Roteadores, *handlers* e DTOs.
-* `/messaging`: *Publishers* e *Subscribers* do Redis.
-* `/repository`: Implementações do banco de dados (MySQL e MongoDB).
+  * `/app`: Lógica de negócio e serviços (`produto_service.go`, `mercado_service.go`, etc).
+  * `/infrastructure`: Camada de adaptação técnica.
+    * `/http`: Roteadores, *handlers* e DTOs.
+    * `/messaging`: *Publishers* e *Subscribers* do Redis.
+    * `/repository`: Implementações do banco de dados (MySQL e MongoDB).
 * `/migrations`: Scripts de inicialização do banco de dados relacional (`init.sql`).
 * `/tmp`: Armazenamento temporário, como por exemplo, imagens e uploads.
