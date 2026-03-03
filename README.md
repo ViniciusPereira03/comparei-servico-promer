@@ -62,30 +62,20 @@ REDIS_MESSAGING_PORT=6379
 ```
 
 
-3. **Subindo a Infraestrutura com Docker Compose:**
-O projeto já possui um `docker-compose.yml` configurado com as imagens do MySQL, MongoDB, Redis e a própria aplicação Go.
-Execute o comando abaixo para construir e iniciar os contêineres:
+3. **Executar a Aplicação com `run.sh`:**
+Dá permissão de execução ao script (caso ainda não tenha dado) e executa-o. Este ficheiro já está configurado para inicializar a aplicação corretamente com os devidos parâmetros:
 ```bash
-docker-compose up -d --build
+chmod +x run.sh
+./run.sh
 
 ```
-
 
 > **Nota:** O script aguardará automaticamente (`wait-for-it.sh`) os bancos de dados estarem prontos antes de iniciar o servidor Go.
 
-
-4. **Verificando os Logs:**
-Para acompanhar a inicialização e certificar-se de que os serviços (HTTP e Subscriber) estão rodando:
-```bash
-docker-compose logs -f app
-
-```
-
-
-Você deverá ver mensagens informando:
+4. **Verificar os Logs:**
+Após a execução do script, deves ver as seguintes mensagens no terminal confirmando que os serviços estão a rodar:
 * `📡 Inicializando subscriber...`
 * `🚀 Servidor rodando na porta 8082`
-
 
 
 ## 📂 Estrutura de Diretórios (Resumo)
